@@ -1,5 +1,4 @@
 package INTERFACE.src;
-
 import java.io.*;
 
 import javax.swing.*;
@@ -19,6 +18,20 @@ public class Interfata extends JFrame
 
         Interfata frame = new Interfata();
         frame.setVisible(true);
+        frame.setResizable(false);
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                if (JOptionPane.showConfirmDialog(frame,
+                        "Datele introduse si nearhivate se vor pierde!", "Doriti sa inchideti?",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+                    File f = new File("activa.csv");
+                    f.delete();
+                    System.exit(0);
+                }
+            }
+        });
     }
 
     @Serial
@@ -33,7 +46,7 @@ public class Interfata extends JFrame
     public Interfata() {
 
         setTitle("FungusForge");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setBounds(100, 100, 715, 530);
         JPanel interfataActiv = new JPanel();
         interfataActiv.setBorder(new EmptyBorder(5, 5, 5, 5));
