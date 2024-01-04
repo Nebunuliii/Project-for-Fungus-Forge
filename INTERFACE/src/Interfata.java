@@ -5,6 +5,7 @@ import java.io.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 
 public class Interfata extends JFrame
@@ -229,6 +230,18 @@ public class Interfata extends JFrame
         ZonaSearch.add(textSearch);
 
         JButton SearchButton = new JButton("Search");
+        SearchButton.addActionListener(e -> {
+            if(textSearch.getText().length() != 3 || !textSearch.getText().isEmpty())
+            {
+                JOptionPane.showMessageDialog(null, "Introduceti primele 3 caractere!");
+            }
+            else
+            {
+                TableRowSorter<DefaultTableModel> search = new TableRowSorter<>(model);
+                TabelActiv.setRowSorter(search);
+                search.setRowFilter(RowFilter.regexFilter(textSearch.getText().trim(),0));
+            }
+        });
         SearchButton.setBounds(110, 0, 89, 20);
         ZonaSearch.add(SearchButton);
     }
