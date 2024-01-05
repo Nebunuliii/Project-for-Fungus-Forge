@@ -1,4 +1,5 @@
 package INTERFACE.src;
+
 import java.io.*;
 
 import javax.swing.*;
@@ -6,34 +7,14 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
-public class Interfata extends JFrame
-{
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
+import java.util.Random;
 
-        Interfata frame = new Interfata();
-        frame.setVisible(true);
-        frame.setResizable(false);
-        frame.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                if (JOptionPane.showConfirmDialog(frame,
-                        "Datele introduse si nearhivate se vor pierde!", "Doriti sa inchideti?",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
-                    File f = new File("activa.csv");
-                    f.delete();
-                    System.exit(0);
-                }
-            }
-        });
-    }
-
+public class InterfataActiv extends JFrame {
     @Serial
     private static final long serialVersionUID = 1L;
     private final JTable TabelActiv;
@@ -42,10 +23,11 @@ public class Interfata extends JFrame
     private final JTextField ZonaCaSO4;
     private final JTextField ZonaStadiu;
     private final JTextField ZonaData;
+    SimpleDateFormat fdata = new SimpleDateFormat("dd/MM/yyyy");
 
-    public Interfata() {
+    public InterfataActiv() {
 
-        setTitle("FungusForge");
+        setTitle("FungusForge-Activa");
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setBounds(100, 100, 715, 530);
         JPanel interfataActiv = new JPanel();
@@ -188,12 +170,10 @@ public class Interfata extends JFrame
 
         JButton Delete = new JButton("Delete");
         Delete.addActionListener(e -> {
-            if(TabelActiv.getSelectedRow() == -1)
-            {
+            if(TabelActiv.getSelectedRow() == -1) {
                 JOptionPane.showMessageDialog(null, "Selectati minim un rand!");
             }
-            else
-            {
+            else {
                 int[] selectedRows = TabelActiv.getSelectedRows();
                 for (int i = selectedRows.length - 1; i >= 0; i--) {
                     model.removeRow(selectedRows[i]);
@@ -228,6 +208,64 @@ public class Interfata extends JFrame
         PanouButoane.add(Delete);
 
         JButton Arhivare = new JButton("Arhivare");
+        Arhivare.addActionListener(e -> {
+            if(TabelActiv.getSelectedRow() == -1) {
+                JOptionPane.showMessageDialog(null, "Selectati minim un rand!");
+            }
+            else {
+                try {
+                    Random rand = new Random();
+                    int rand_int = 12 + rand.nextInt(13);
+
+                    String timp;
+                    Date timpD;
+                    Calendar timpC= Calendar.getInstance();
+
+                    PrintWriter csv_arh = new PrintWriter(new FileWriter("arhiva.csv", true));
+
+                    int[] selectedRows = TabelActiv.getSelectedRows();
+
+
+                    for (int i = selectedRows.length - 1; i >= 0; i--) {
+                        timp = model.getValueAt(selectedRows[i], 4).toString();
+                        timpD = fdata.parse(timp);
+                        timpC.setTime(timpD);
+                        timpC.add(Calendar.DAY_OF_MONTH, 7);
+                        timpD = timpC.getTime();
+                        csv_arh.write(model.getValueAt(selectedRows[i], 0) + ","
+                                       + model.getValueAt(selectedRows[i], 1) + ","
+                                       + model.getValueAt(selectedRows[i], 2) + ","
+                                       + model.getValueAt(selectedRows[i], 4) + ","
+                                       + fdata.format(timpD) + ","
+                                       + rand_int + "\n");
+
+                        model.removeRow(selectedRows[i]);
+                    }
+
+                    csv_arh.close();
+
+                    FileWriter csv_act = new FileWriter("activa.csv");
+
+                    csv_act.write(model.getColumnName(0));
+                    for (int i = 1; i < model.getColumnCount(); i++) {
+                        csv_act.write("," + model.getColumnName(i));
+                    }
+
+                    csv_act.write("\n");
+
+                    for (int i = 0; i < model.getRowCount(); i++) {
+                        csv_act.write(model.getValueAt(i, 0).toString());
+                        for (int j = 1; j < model.getColumnCount(); j++) {
+                            csv_act.write("," + model.getValueAt(i, j).toString());
+                        }
+                        csv_act.write("\n");
+                    }
+
+                    csv_act.close();
+                } catch (IOException | ParseException ignored) {
+                }
+            }
+        });
         Arhivare.setBounds(41, 346, 89, 23);
         PanouButoane.add(Arhivare);
 
